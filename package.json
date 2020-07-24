@@ -1,0 +1,34 @@
+{
+  "name": "merkleairdrop",
+  "version": "1.0.0",
+  "description": "Efficient token air drop using Merkle Tree",
+  "main": "index.js",
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LorranSutter/MerkleAirDrop.git"
+  },
+  "keywords": [
+    "Merkle Tree",
+    "Air Drop",
+    "Token",
+    "Ethereum",
+    "Truffle",
+    "Solidity",
+    "Smart Contracts"
+  ],
+  "author": "Lorran Sutter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LorranSutter/MerkleAirDrop/issues"
+  },
+  "homepage": "https://github.com/LorranSutter/MerkleAirDrop#readme",
+  "devDependencies": {
+    "solium": "^1.2.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.1.0"
+  }
+}

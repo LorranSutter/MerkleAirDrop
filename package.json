@@ -28,6 +28,7 @@
   "devDependencies": {
     "bn.js": "^5.1.2",
     "eslint": "^7.5.0",
+    "ethers": "^5.0.7",
     "solium": "^1.2.5"
   },
   "dependencies": {

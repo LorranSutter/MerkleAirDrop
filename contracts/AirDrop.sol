@@ -11,7 +11,6 @@ contract AirDrop {
     bytes32 public airDropWhiteListMerkleRoot;
     mapping(address => bool) redeemed;
 
-    /// @author Lorran Sutter
     /// @param _token Token to be air dropped
     /// @param _airDropWhiteListMerkleRoot Merkle root of the addresses white list.
     constructor(Token _token, bytes32 _airDropWhiteListMerkleRoot) public {
@@ -19,7 +18,6 @@ contract AirDrop {
         airDropWhiteListMerkleRoot = _airDropWhiteListMerkleRoot;
     }
 
-    /// @author Lorran Sutter
     /// @notice Addresses can redeem their tokens.
     /// @param path Proof path.
     /// @param witnesses List of proof witnesses.

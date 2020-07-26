@@ -22,8 +22,8 @@ contract Token is ERC20Capped {
 
     /// @param account Account to which tokens will be minted
     /// @param amount Amount of tokens to be minted
-    function mint(address account, uint256 amount) private {
-        require(msg.sender == owner, "Token: only owner can mint");
+    function mint(address account, uint256 amount) public {
+        require(msg.sender == owner, "Token: only owner can mint.");
         super._mint(account, amount);
     }
 }

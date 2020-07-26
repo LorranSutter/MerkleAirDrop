@@ -1,9 +1,7 @@
-/* global artifacts contract before describe it assert */
+/* global artifacts contract before it assert */
 
-const BN = require("bn.js");
-
-// const BN = require('bn.js');
-// const truffleAssert = require('truffle-assertions');
+const BN = require('bn.js');
+const truffleAssert = require('truffle-assertions');
 
 const Token = artifacts.require('Token');
 
@@ -12,10 +10,7 @@ contract('Token', (accounts) => {
 	const tokenSymbol = 'TKN';
 	const tokenCap = (new BN(10)).pow(new BN(42));
 	const addressZero = '0x0000000000000000000000000000000000000000';
-	const creator = accounts[0];
-	const userMinting = accounts[1];
-	const userTransfer01 = accounts[2];
-	const userTransfer02 = accounts[3];
+	const account01 = accounts[1];
 
 	let tokenContractInstance;
 
@@ -23,96 +18,44 @@ contract('Token', (accounts) => {
 		tokenContractInstance = await Token.deployed();
 	});
 
-	describe('A - Minting', () => {
+	it('01 - token should have right name, symbol and cap', async () => {
+		const name = await tokenContractInstance.name.call();
+		const symbol = await tokenContractInstance.symbol.call();
+		const cap = await tokenContractInstance.cap.call();
 
-		it('A.01 - token should have right name, symbol and cap', async () => {
-			const name = await tokenContractInstance.name.call();
-			const symbol = await tokenContractInstance.symbol.call();
-			const cap = await tokenContractInstance.cap.call();
-
-			assert.equal(name, tokenName, `Token name should be ${tokenName}`);
-			assert.equal(symbol, tokenSymbol, `Token symbol should be ${tokenSymbol}`);
-			assert.equal(cap, tokenCap.toString(), `Token cap should be ${tokenCap}`);
-		});
-
-		// it('A.02 - creator should be able to mint new tokens', async () => {
-		// 	const amount = 42;
-
-		// 	const tx = await tokenContractInstance.mint(userMinting, amount, { from: creator });
-		// 	const userMintingBalance = await tokenContractInstance.balanceOf(userMinting);
-		// 	const totalSupply = await tokenContractInstance.totalSupply.call();
-
-		// 	truffleAssert.eventEmitted(tx, 'Transfer', (obj) => {
-		// 		return (
-		// 			obj.from == addressZero &&
-		// 			obj.to === userMinting &&
-		// 			obj.value == amount
-		// 		);
-		// 	}, `Fail to transfer ${amount} to ${userMinting} during minting`);
-
-		// 	assert.equal(new BN(userMintingBalance), amount, `Balance of ${userMinting} must be ${amount}`);
-		// 	assert.equal(new BN(totalSupply), amount, `Total supply must be ${amount}`);
-		// });
-
+		assert.equal(name, tokenName, `Token name should be ${tokenName}`);
+		assert.equal(symbol, tokenSymbol, `Token symbol should be ${tokenSymbol}`);
+		assert.equal(cap, tokenCap.toString(), `Token cap should be ${tokenCap}`);
 	});
 
-	// describe('B - Transfer', () => {
+	it('02 - token should be able to mint', async () => {
+		const tx = await tokenContractInstance.mint(account01, tokenCap);
 
-	// 	it('B.01 - should not be able make a transfer before startTime', async () => {
-	// 		const startTime = parseInt(+(new Date()) / 1000) + 100;
-	// 		const endTime = startTime + 1000;
-	// 		const tokenContractInstanceTransfer = await Token.new('UIToken', 'UIT', 18, startTime, endTime, { from: creator });
+		truffleAssert.eventEmitted(tx, 'Transfer', (obj) => {
+			return (
+				obj.from === addressZero &&
+				obj.to === account01 &&
+				obj.value.eq(tokenCap)
+			);
+		});
+	});
 
-	// 		const amount = 42;
+	it('03 - token should not be able to mint more than cap', async () => {
+		const totalSupply = await tokenContractInstance.totalSupply.call();
+		const cap = await tokenContractInstance.cap.call();
 
-	// 		await truffleAssert.reverts(
-	// 			tokenContractInstanceTransfer.transfer(userTransfer02, amount, { from: userTransfer01 }),
-	// 			'Token: it is not possible transfer tokens before startTime.'
-	// 		);
-	// 	});
+		const toMint = cap.sub(totalSupply).add(new BN(1));
 
-	// 	it('B.02 - should not be able make a transfer after endTime', async () => {
-	// 		const startTime = parseInt(+(new Date()) / 1000) - 100;
-	// 		const endTime = startTime - 10;
-	// 		const tokenContractInstanceTransfer = await Token.new('UIToken', 'UIT', 18, startTime, endTime, { from: creator });
+		await truffleAssert.reverts(
+			tokenContractInstance.mint(account01, toMint),
+			'ERC20Capped: cap exceeded.'
+		);
+	});
 
-	// 		const amount = 42;
-
-	// 		await truffleAssert.reverts(
-	// 			tokenContractInstanceTransfer.transfer(userTransfer02, amount, { from: userTransfer01 }),
-	// 			'Token: it is not possible transfer tokens after endTime.'
-	// 		);
-	// 	});
-
-	// 	it('B.03 - should not be able make a transfer without enough balance', async () => {
-	// 		const amount = 42;
-
-	// 		await truffleAssert.reverts(
-	// 			tokenContractInstance.transfer(userTransfer02, amount, { from: userTransfer01 }),
-	// 			'ERC20: transfer amount exceeds balance.'
-	// 		);
-	// 	});
-
-	// 	it('B.04 - should be able make a transfer', async () => {
-	// 		const amount = 42;
-	// 		await tokenContractInstance.mint(userTransfer01, amount, { from: creator });
-	// 		const tx = await tokenContractInstance.transfer(userTransfer02, amount, { from: userTransfer01 });
-
-	// 		truffleAssert.eventEmitted(tx, 'Transfer', (obj) => {
-	// 			return (
-	// 				obj.from == userTransfer01 &&
-	// 				obj.to === userTransfer02 &&
-	// 				obj.value == amount
-	// 			);
-	// 		}, `Fail to transfer ${amount} from ${userTransfer01} to ${userTransfer02}`);
-
-	// 		const userTransfer01Balance = await tokenContractInstance.balanceOf(userTransfer01);
-	// 		const userTransfer02Balance = await tokenContractInstance.balanceOf(userTransfer02);
-
-	// 		assert.equal(new BN(userTransfer01Balance), 0, `Balance of ${userTransfer01} must be 0`);
-	// 		assert.equal(new BN(userTransfer02Balance), amount, `Balance of ${userTransfer02} must be ${amount}`);
-	// 	});
-
-	// });
-
+	it('04 - only owner should be able to mint', async () => {
+		await truffleAssert.reverts(
+			tokenContractInstance.mint(account01, 1, { from: account01 }),
+			'Token: only owner can mint.'
+		);
+	});
 });

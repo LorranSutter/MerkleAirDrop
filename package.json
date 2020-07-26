@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/LorranSutter/MerkleAirDrop#readme",
   "devDependencies": {
+    "bn.js": "^5.1.2",
     "solium": "^1.2.5"
   },
   "dependencies": {

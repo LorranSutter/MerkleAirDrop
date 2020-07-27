@@ -4,7 +4,7 @@ Efficient token air drop using Merkle Tree
 
 ## :fuelpump: Gas Optimization
 
-Inline only owner modifier to reduce number of lines.
+<!-- Inline only owner modifier to reduce number of lines. -->
 
 ## :closed_lock_with_key: Security
 
@@ -49,6 +49,12 @@ To check tests coverage, execute the following command:
 ```sh
 truffle run coverage
 ```
+
+<div align="center">
+
+<img src="https://res.cloudinary.com/lorransutter/image/upload/v1595812572/MerkleAirDropCoverage.png" height=400>
+
+</div>
 
 ## :book: Resources
 

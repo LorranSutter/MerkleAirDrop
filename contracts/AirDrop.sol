@@ -25,7 +25,7 @@ contract AirDrop {
     modifier onlyOwner() {
         require(
             msg.sender == owner,
-            "AirDrop: only owner can update Merkle Root."
+            "AirDrop: only owner can perform this transaction."
         );
         _;
     }
@@ -79,5 +79,13 @@ contract AirDrop {
         token.transfer(msg.sender, _amount);
 
         emit Redeem(msg.sender, _amount);
+    }
+
+    /// @notice It cancels the Air Drop availability.
+    /// @dev Only owner can perform this transaction. It selfdestructs the contract.
+    function cancelAirDrop() public onlyOwner {
+        uint256 contractBalance = token.balanceOf(address(this));
+        token.transfer(owner, contractBalance);
+        selfdestruct(address(0));
     }
 }

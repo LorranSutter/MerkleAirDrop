@@ -1,4 +1,4 @@
-/* global artifacts contract before it assert */
+/* global artifacts contract before it assert web3 */
 
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
@@ -128,7 +128,40 @@ contract('Air Drop', (accounts) => {
 	it('05 - only owner should be able to update Merkle Root', async () => {
 		truffleAssert.reverts(
 			airDropContractInstance.updateMerkleRoot(merkleRoot, { from: account01 }),
-			'AirDrop: only owner can update Merkle Root.'
+			'AirDrop: only owner can perform this transaction.'
+		);
+	});
+
+	it('06 - should be able to cancel air drop', async () => {
+		// Local deployment
+		const newMerkleRoot = merkleTree.merkleRoot(accounts);
+		const newCap = (new BN(10)).pow(new BN(42));
+		const newToken = await Token.new('Token', 'TKN', newCap, { from: creator });
+		const newAirDrop = await AirDrop.new(newToken.address, newMerkleRoot, { from: creator });
+
+		const initialOwnerBalance = await newToken.balanceOf(creator);
+		const contractBalance = await newToken.balanceOf(newAirDrop.address);
+
+		await newAirDrop.cancelAirDrop({ from: creator });
+
+		const newOwnerBalance = await newToken.balanceOf(creator);
+		const calculatedNewOwnerBalance = initialOwnerBalance.add(contractBalance);
+
+		assert.isOk(
+			newOwnerBalance.eq(calculatedNewOwnerBalance),
+			`Owner balance should be ${calculatedNewOwnerBalance}`
+		);
+
+		assert.equal(
+			await web3.eth.getCode(newAirDrop.address),
+			'0x',
+			`Contract ${newAirDrop.address} should have been selfdestructed`);
+	});
+
+	it('07 - only contract creator should be able to cancel air drop', async () => {
+		await truffleAssert.reverts(
+			airDropContractInstance.cancelAirDrop({ from: account01 }),
+			'AirDrop: only owner can perform this transaction.'
 		);
 	});
 

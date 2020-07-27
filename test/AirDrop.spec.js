@@ -15,13 +15,16 @@ contract('Air Drop', (accounts) => {
 	const creator = accounts[0];
 	const account01 = accounts[1];
 	const account02 = accounts[2];
+	const account03 = accounts[3];
 
 	const accountToBeAdded = accounts[accounts.length - 2];
 	const accountNotInTheWhiteList = accounts[accounts.length - 1];
 
+	const maxRedeemAmount = (new BN(10)).pow(new BN(20));
 	const merkleRoot = merkleTree.merkleRoot(whiteList);
 	const account01Proof = merkleTree.merkleProof(whiteList, account01);
 	const account02Proof = merkleTree.merkleProof(whiteList, account02);
+	const account03Proof = merkleTree.merkleProof(whiteList, account03);
 
 	let airDropAddress;
 	let tokenContractInstance;
@@ -111,7 +114,21 @@ contract('Air Drop', (accounts) => {
 		);
 	});
 
-	it('04 - it should be able to update Merkle Root', async () => {
+	it('04 - customer can only redeem at most max redeem amount', async () => {
+		const amount = maxRedeemAmount.mul(new BN(2));
+
+		await truffleAssert.reverts(
+			airDropContractInstance.redeem(
+				account03Proof.path,
+				account03Proof.witnesses,
+				amount,
+				{ from: account03 }
+			),
+			'AirDrop: amount must be less than max redeem amount.'
+		);
+	});
+
+	it('05 - it should be able to update Merkle Root', async () => {
 		const newWhiteList = [...whiteList, accountToBeAdded];
 		const newMerkleRoot = merkleTree.merkleRoot(newWhiteList);
 
@@ -125,19 +142,20 @@ contract('Air Drop', (accounts) => {
 		);
 	});
 
-	it('05 - only owner should be able to update Merkle Root', async () => {
+	it('06 - only owner should be able to update Merkle Root', async () => {
 		truffleAssert.reverts(
 			airDropContractInstance.updateMerkleRoot(merkleRoot, { from: account01 }),
 			'AirDrop: only owner can perform this transaction.'
 		);
 	});
 
-	it('06 - should be able to cancel air drop', async () => {
+	it('07 - should be able to cancel air drop', async () => {
 		// Local deployment
 		const newMerkleRoot = merkleTree.merkleRoot(accounts);
 		const newCap = (new BN(10)).pow(new BN(42));
+		const newMaxRedeemAmount = (new BN(10)).pow(new BN(20));
 		const newToken = await Token.new('Token', 'TKN', newCap, { from: creator });
-		const newAirDrop = await AirDrop.new(newToken.address, newMerkleRoot, { from: creator });
+		const newAirDrop = await AirDrop.new(newToken.address, newMerkleRoot, newMaxRedeemAmount, { from: creator });
 
 		const initialOwnerBalance = await newToken.balanceOf(creator);
 		const contractBalance = await newToken.balanceOf(newAirDrop.address);
@@ -158,7 +176,7 @@ contract('Air Drop', (accounts) => {
 			`Contract ${newAirDrop.address} should have been selfdestructed`);
 	});
 
-	it('07 - only contract creator should be able to cancel air drop', async () => {
+	it('08 - only contract creator should be able to cancel air drop', async () => {
 		await truffleAssert.reverts(
 			airDropContractInstance.cancelAirDrop({ from: account01 }),
 			'AirDrop: only owner can perform this transaction.'

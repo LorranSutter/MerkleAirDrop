@@ -11,15 +11,17 @@ contract AirDrop {
     Token private token;
     bytes32 public airDropWhiteListMerkleRoot;
     mapping(address => bool) private redeemed;
+    uint256 maxRedeemAmount;
 
     event Redeem(address indexed account, uint256 amount);
 
     /// @param _token Token to be air dropped
     /// @param _airDropWhiteListMerkleRoot Merkle root of the addresses white list.
-    constructor(Token _token, bytes32 _airDropWhiteListMerkleRoot) public {
+    constructor(Token _token, bytes32 _airDropWhiteListMerkleRoot, uint256 _maxRedeemAmount) public {
         owner = msg.sender;
         token = _token;
         airDropWhiteListMerkleRoot = _airDropWhiteListMerkleRoot;
+        maxRedeemAmount = _maxRedeemAmount;
     }
 
     modifier onlyOwner() {
@@ -39,7 +41,6 @@ contract AirDrop {
         airDropWhiteListMerkleRoot = _airDropWhiteListMerkleRoot;
     }
 
-    // TODO Include assembly computation
     /// @notice Addresses can redeem their tokens.
     /// @param _path Proof path.
     /// @param _witnesses List of proof witnesses.
@@ -49,6 +50,7 @@ contract AirDrop {
         bytes32[] memory _witnesses,
         uint256 _amount
     ) public {
+        require(_amount <= maxRedeemAmount, "AirDrop: amount must be less than max redeem amount.");
         require(!redeemed[msg.sender], "AirDrop: already redeemed.");
 
         // Avoid no-assign-params

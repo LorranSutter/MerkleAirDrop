@@ -97,7 +97,7 @@ truffle run coverage
 - [Merkle Air-Drops](https://blog.ricmoo.com/merkle-air-drops-e6406945584d)
 - [Merkle Airdrop - Smartz](https://wiki.smartz.io/documentation/merkle-airdrop/)
 
-## Technologies :computer:
+## :computer: Technologies
 
 - [Solidity](https://solidity.readthedocs.io/) - smart contract programming language
 - [Truffle](https://www.trufflesuite.com/) - dApp environment
